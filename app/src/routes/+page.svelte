@@ -5,7 +5,7 @@
   let {data}: {data: PageData} = $props();
 </script>
 
-<h1>Users</h1>
+<h2>Users</h2>
 <ul>
   {#each data.users as user}
     <li>{user.email}</li>
