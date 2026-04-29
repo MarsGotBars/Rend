@@ -1,23 +1,21 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { cmsRoot } from './path'
-import { buildConfig } from 'payload'
-import { fileURLToPath } from 'url'
-import sharp from 'sharp'
-import { Users } from './collections/Users'
-import { Media } from './collections/Media'
 import dotenv from 'dotenv'
-
+import path from 'path'
+import { buildConfig } from 'payload'
+import sharp from 'sharp'
+import { fileURLToPath } from 'url'
+import { Media } from './collections/Media'
+import { Users } from './collections/Users'
+import { Pages } from './collections/Pages'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const mediaDir = path.resolve(cmsRoot, 'media');
-
+// 1. Load .env from the project root reliably
 dotenv.config({
-  path: path.resolve(dirname, '../../../.env')  // Now resolves to project root
-});
+  path: path.resolve(process.cwd(), '.env'),
+})
 
 export default buildConfig({
   admin: {
@@ -26,16 +24,17 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Pages],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
-    // Moves payload-types.ts to /app/cms/payload-types.ts
-    outputFile: path.resolve(cmsRoot, 'payload-types.ts'),
+    // Keeps types in the CMS source folder for development convenience
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URL || `file:${path.resolve(cmsRoot, 'local.db')}`,
+      // 2. Database now lives in the project root
+      url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'payload.db')}`,
     },
   }),
   sharp,

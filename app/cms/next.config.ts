@@ -1,10 +1,14 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
-console.log(dirname);
+
+dotenv.config({
+  path: path.resolve(__dirname, '.env'),
+})
 
 // /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,7 +17,7 @@ const nextConfig = {
   },
   experimental: {
     turbopackServerFastRefresh: true,
-  }
+  },
 }
 
 export default withPayload(nextConfig)

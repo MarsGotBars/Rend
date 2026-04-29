@@ -7,3 +7,9 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+.next/*
+.next/**/*
+.svelte-kit/*
+**/.next/**/*
+**/.vscode/**/*
