@@ -1,10 +1,22 @@
-import type { CollectionConfig } from 'payload'
-import { mediaDir } from '../path'
+// collections/Media.ts
+import path from 'path'
+import { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: {
-    read: () => true,
+  upload: {
+    // 3. Media files are saved to /media in the project root
+    staticDir: path.resolve(process.cwd(), 'media'),
+    staticURL: '/media', 
+    adminThumbnail: 'thumbnail',
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 400,
+        height: 300,
+        position: 'centre',
+      },
+    ],
   },
   fields: [
     {
@@ -13,7 +25,4 @@ export const Media: CollectionConfig = {
       required: true,
     },
   ],
-  upload: {
-    staticDir: mediaDir,
-  },
 }
