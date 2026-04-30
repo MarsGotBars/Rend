@@ -4,7 +4,7 @@
 		users: {
 			email: string;
 		}[];
-		media: {
+		images: {
 			title: string;
 			url: string;
 		}[];
@@ -18,8 +18,8 @@
 		<li>{user.email}</li>
 	{/each}
 
-	{#each data.media as item}
+	{#each data.images as item}
 		<li>{item.title}</li>
-		<img src={`http://localhost:3000/${item.url}`} alt={item.title} />
+		<img src={item.url} alt={item.title} />
 	{/each}
 </ul>
