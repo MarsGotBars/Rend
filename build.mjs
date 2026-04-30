@@ -20,6 +20,11 @@ async function runCommand(cmd, args) {
 }
 
 async function build() {
+  if(process.env.MIGRATIONS === 'false') {
+    console.log("Build is currently disabled as migrations interfere with development");
+    
+    return
+  }
   try {
     // Create empty DB file if it doesn't exist
     const dbPath = path.resolve(__dirname, 'dev.db')
