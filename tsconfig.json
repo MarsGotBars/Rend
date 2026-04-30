@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@payload-config": ["./app/cms/src/payload.config.ts"]
+    }
+  }
+}

@@ -5,9 +5,9 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
-import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 import { Pages } from './collections/Pages'
+import { Images } from './collections/Images'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages],
+  collections: [Users, Pages, Images],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -34,7 +34,7 @@ export default buildConfig({
   db: sqliteAdapter({
     client: {
       // 2. Database now lives in the project root
-      url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'payload.db')}`,
+      url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'dev.db')}`,
     },
   }),
   sharp,
