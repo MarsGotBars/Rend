@@ -7,7 +7,6 @@ export const Media: CollectionConfig = {
   upload: {
     // 3. Media files are saved to /media in the project root
     staticDir: path.resolve(process.cwd(), 'media'),
-    staticURL: '/media', 
     adminThumbnail: 'thumbnail',
     imageSizes: [
       {

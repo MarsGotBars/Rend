@@ -34,7 +34,7 @@ export default buildConfig({
   db: sqliteAdapter({
     client: {
       // 2. Database now lives in the project root
-      url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'payload.db')}`,
+      url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'dev.db')}`,
     },
   }),
   sharp,
