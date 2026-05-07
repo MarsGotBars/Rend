@@ -40,6 +40,8 @@ export default buildConfig({
       // 2. Database now lives in the project root
       url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'dev.db')}`,
     },
+    // Skip migrations - Payload will auto-create schema
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   sharp,
   plugins: [],
