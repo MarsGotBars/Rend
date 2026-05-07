@@ -43,13 +43,24 @@ async function build() {
     const migrationsPath = path.resolve(__dirname, 'migrations')
     if (!existsSync(migrationsPath)) {
       console.log('\n▶ No migrations found, generating initial migration...')
-      await runCommand('pnpm', ['payload', 'migrate:create', '--name', 'initial'], {
-        cwd: path.resolve(__dirname, 'app/cms'),
-        env: { ...process.env, PAYLOAD_CONFIG_PATH: './src/payload.config.ts', NODE_OPTIONS: '--no-deprecation' }
-      })
+      try {
+        await runCommand('pnpm', ['payload', 'migrate:create', '--name', 'initial'], {
+          cwd: path.resolve(__dirname, 'app/cms'),
+          env: { ...process.env, PAYLOAD_CONFIG_PATH: './src/payload.config.ts', NODE_OPTIONS: '--no-deprecation' }
+        })
+      } catch (err) {
+        console.warn('\n⚠ Could not generate initial migration (will run at startup):', err.message)
+      }
     }
 
-    await runCommand('pnpm', ['run', 'build:migrate'])
+    // Try to run migrations but don't fail build if they fail
+    try {
+      await runCommand('pnpm', ['run', 'build:migrate'])
+      console.log('✓ Migrations completed')
+    } catch (err) {
+      console.warn('\n⚠ Migrations failed (will retry at startup):', err.message)
+    }
+
     await runCommand('pnpm', ['run', 'build:next'])
     
     // Pass PAYLOAD_CONFIG_PATH to SvelteKit build so it can resolve Payload config during prerender
