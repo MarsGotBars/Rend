@@ -1,7 +1,7 @@
-import adapter from '@sveltejs/adapter-static';
-import dotenv from 'dotenv';
+import adapter from '@sveltejs/adapter-static'
+import dotenv from 'dotenv'
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env' })
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -13,9 +13,10 @@ const config = {
 		alias: {
 			'@cms': 'app/cms/src'
 		},
+		adapter: adapter(),
 		prerender: {
 			entries: ['*'],
-			handleUnseenRoutes: 'warn'
+			crawl: true
 		},
 		files: {
 			appTemplate: 'app/src/app.html',
@@ -29,6 +30,6 @@ const config = {
 			serviceWorker: 'app/src/service-worker'
 		}
 	}
-};
+}
 
-export default config;
+export default config
