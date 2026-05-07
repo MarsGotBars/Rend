@@ -1,5 +1,4 @@
 import { createServer } from 'node:http';
-import { handler as skHandler } from './build/handler.js';
 import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +11,49 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const PORT = process.env.PORT || 3000;
 
+// Global state for hot reload
+let skHandler = null;
+let skModule = null;
+let nextHandler = null;
+let nextPrepared = false;
+
+// Function to load SvelteKit handler (can be called to reload)
+async function loadSvelteKitHandler() {
+	try {
+		// Clear the require cache and re-import to get fresh handler
+		// For ESM, we need to use a query param trick to bypass cache
+		const timestamp = Date.now();
+		const modulePath = `./build/handler.js?t=${timestamp}`;
+		
+		// Try to unload the old module from Node's cache
+		delete import.meta.url;
+		
+		skModule = await import('./build/handler.js?' + timestamp);
+		skHandler = skModule.handler;
+		console.log('✓ SvelteKit handler reloaded');
+		return true;
+	} catch (err) {
+		console.error('✗ Failed to reload SvelteKit handler:', err.message);
+		return false;
+	}
+}
+
+// EventEmitter-style reload trigger
+let reloadListeners = [];
+export function onReload(callback) {
+	reloadListeners.push(callback);
+}
+
+export async function triggerReload() {
+	console.log('[reload] Triggering hot reload...');
+	const success = await loadSvelteKitHandler();
+	if (success) {
+		console.log('[reload] SvelteKit handler reloaded successfully');
+		reloadListeners.forEach(cb => cb());
+	}
+	return success;
+}
+
 async function start() {
 	try {
 		console.log('Starting server...');
@@ -23,8 +65,8 @@ async function start() {
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
 		
-		let nextHandler = null;
-		let nextPrepared = false;
+		// Load initial SvelteKit handler
+		await loadSvelteKitHandler();
 		
 		try {
 			const nextApp = next({
@@ -44,10 +86,27 @@ async function start() {
 		const server = createServer((req, res) => {
 			const url = req.url ?? '/';
 
+			// Handle internal reload endpoint
+			if (url === '/__reload' && req.method === 'POST') {
+				loadSvelteKitHandler().then((success) => {
+					if (success) {
+						res.writeHead(200, { 'Content-Type': 'application/json' });
+						res.end(JSON.stringify({ status: 'reloaded' }));
+					} else {
+						res.writeHead(500, { 'Content-Type': 'application/json' });
+						res.end(JSON.stringify({ status: 'failed' }));
+					}
+				});
+				return;
+			}
+
 			if (nextPrepared && (url.startsWith('/admin') || url.startsWith('/_next') || url.startsWith('/api'))) {
 				nextHandler(req, res);
-			} else {
+			} else if (skHandler) {
 				skHandler(req, res);
+			} else {
+				res.writeHead(503, { 'Content-Type': 'text/plain' });
+				res.end('Service Unavailable: SvelteKit handler not ready');
 			}
 		});
 

@@ -48,10 +48,10 @@ export function RebuildButton() {
 	}
 
 	const label: Record<BuildStatus, string> = {
-		idle: 'Rebuild Frontend',
+		idle: 'Rebuild & Reload Frontend',
 		started: 'Starting…',
 		building: 'Building…',
-		done: 'Build Complete',
+		done: 'Reloaded! Changes Live',
 		error: 'Build Failed',
 	}
 
