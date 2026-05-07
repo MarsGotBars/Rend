@@ -16,14 +16,21 @@ export async function POST() {
 
 	isRebuilding = true
 
+	// Clean old build to avoid stale chunk references
+	const fsPromises = await import('fs/promises')
+	try {
+		await fsPromises.rm(path.join(workspaceRoot, '.svelte-kit/output'), { recursive: true, force: true })
+	} catch {
+		// Ignore cleanup errors
+	}
+
 	const proc = spawn('pnpm', ['run', 'build:sveltekit'], {
 		cwd: workspaceRoot,
 		shell: true,
 		stdio: 'pipe',
 		env: {
 			...process.env,
-			// Force fresh prerender by ensuring Payload can be loaded
-			PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
+			// Don't set PAYLOAD_CONFIG_PATH in container — let entries() gracefully handle missing config
 			NODE_OPTIONS: '--no-deprecation'
 		}
 	})
@@ -47,13 +54,13 @@ export async function POST() {
 	proc.on('close', (code) => {
 		isRebuilding = false
 		if (code === 0) {
-			console.log('[rebuild] SvelteKit rebuild complete.')
+			console.log('[rebuild] SvelteKit rebuild complete. NOTE: Server must be restarted for changes to take effect.')
 		} else {
 			console.error(`[rebuild] SvelteKit rebuild failed (exit ${code}).`)
 		}
 	})
 
-	return NextResponse.json({ status: 'started' })
+	return NextResponse.json({ status: 'started', note: 'Server must be restarted after rebuild for changes to take effect' })
 }
 
 export async function GET() {
