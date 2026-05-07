@@ -1,0 +1,6 @@
+[build]
+# Install FFmpeg for video processing in Payload CMS
+cmds = [
+  "apt-get update",
+  "apt-get install -y ffmpeg"
+]
