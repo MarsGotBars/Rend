@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-static'
+import adapter from '@sveltejs/adapter-node'
 import dotenv from 'dotenv'
 
 dotenv.config({ path: '.env' })

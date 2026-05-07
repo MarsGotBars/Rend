@@ -14,7 +14,7 @@
 		"build:sveltekit": "vite build",
 		"build:next": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build app/cms",
 		"preview": "cross-env NODE_ENV=production PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts NODE_OPTIONS=--no-deprecation node server.mjs",
-		"start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+		"start": "cross-env NODE_OPTIONS=--no-deprecation node server.mjs",
 		"prepare": "svelte-kit sync || echo ''",
 		"generate:importmap": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts payload generate:importmap --disable-transpile",
 		"generate:types": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts payload generate:types --disable-transpile",
