@@ -8,10 +8,14 @@ import { spawn } from 'child_process';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
-function runCommand(cmd, args) {
+function runCommand(cmd, args, env = {}) {
 	return new Promise((resolve, reject) => {
 		console.log(`Running: ${cmd} ${args.join(' ')}`);
-		const proc = spawn(cmd, args, { stdio: 'inherit', shell: true });
+		const proc = spawn(cmd, args, { 
+			stdio: 'inherit', 
+			shell: true,
+			env: { ...process.env, ...env }
+		});
 		proc.on('close', code => {
 			if (code === 0) resolve();
 			else reject(new Error(`${cmd} failed with code ${code}`));
@@ -27,7 +31,10 @@ async function start() {
 		// Run migrations if needed
 		console.log('Running database migrations...');
 		try {
-			await runCommand('pnpm', ['payload', 'migrate']);
+			await runCommand('pnpm', ['payload', 'migrate'], {
+				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
+				NODE_OPTIONS: '--no-deprecation'
+			});
 			console.log('✓ Migrations completed');
 		} catch (migrateErr) {
 			console.warn('⚠ Migration warning:', migrateErr.message);
