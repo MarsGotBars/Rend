@@ -20,6 +20,12 @@ export async function POST() {
 		cwd: workspaceRoot,
 		shell: true,
 		stdio: 'pipe',
+		env: {
+			...process.env,
+			// Force fresh prerender by ensuring Payload can be loaded
+			PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
+			NODE_OPTIONS: '--no-deprecation'
+		}
 	})
 
 	const output: string[] = []
