@@ -53,10 +53,11 @@ async function build() {
     await runCommand('pnpm', ['run', 'build:next'])
     
     // Pass PAYLOAD_CONFIG_PATH to SvelteKit build so it can resolve Payload config during prerender
+    // Use relative path so it works in both local and container environments
     await runCommand('pnpm', ['run', 'build:sveltekit'], {
       env: { 
         ...process.env, 
-        PAYLOAD_CONFIG_PATH: path.resolve(__dirname, 'app/cms/src/payload.config.ts'),
+        PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
         NODE_OPTIONS: '--no-deprecation'
       }
     })
