@@ -3,24 +3,27 @@ import { handler as skHandler } from './build/handler.js';
 import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'child_process';
+import { getPayload } from 'payload';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
-function runCommand(cmd, args, env = {}) {
-	return new Promise((resolve, reject) => {
-		console.log(`Running: ${cmd} ${args.join(' ')}`);
-		const proc = spawn(cmd, args, { 
-			stdio: 'inherit', 
-			shell: true,
-			env: { ...process.env, ...env }
-		});
-		proc.on('close', code => {
-			if (code === 0) resolve();
-			else reject(new Error(`${cmd} failed with code ${code}`));
-		});
-	});
+async function initializeDatabase() {
+	try {
+		console.log('Initializing database...');
+		
+		// Import the compiled Payload config from Next.js build
+		const { default: config } = await import('./app/cms/.next/server/chunks/payload.config.js');
+		
+		console.log('Loading Payload...');
+		const payload = await getPayload({ config });
+		
+		console.log('✓ Database initialized');
+		return payload;
+	} catch (err) {
+		console.warn('⚠ Database initialization warning:', err.message);
+		return null;
+	}
 }
 
 async function start() {
@@ -28,18 +31,8 @@ async function start() {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
 		
-		// Run migrations if needed
-		console.log('Running database migrations...');
-		try {
-			// Use tsx to run TypeScript migrations
-			await runCommand('pnpm', ['tsx', './node_modules/.bin/payload', 'migrate'], {
-				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
-				NODE_OPTIONS: '--no-deprecation'
-			});
-			console.log('✓ Migrations completed');
-		} catch (migrateErr) {
-			console.warn('⚠ Migration warning (non-critical):', migrateErr.message);
-		}
+		// Initialize database
+		await initializeDatabase();
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
