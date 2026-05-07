@@ -8,7 +8,8 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@payload-config": ["./app/cms/src/payload.config.ts"]
+      "@payload-config": ["./app/cms/src/payload.config.ts"],
+      "@cms/*": ["./app/cms/src/*"]
     }
   }
 }

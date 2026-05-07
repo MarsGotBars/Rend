@@ -10,6 +10,9 @@ const config = {
 	},
 	kit: {
 		adapter: adapter(),
+		alias: {
+			'@cms': 'app/cms/src'
+		},
 		files: {
 			appTemplate: 'app/src/app.html',
 			errorTemplate: 'app/src/error.html',

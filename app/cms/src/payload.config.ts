@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { Users } from './collections/Users.ts'
 import { Pages } from './collections/Pages.ts'
 import { Images } from './collections/Images.ts'
+import { Videos } from './collections/Videos.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,7 +28,7 @@ export default buildConfig({
       actions: ['/components/RebuildButton#RebuildButton'],
     },
   },
-  collections: [Users, Pages, Images],
+  collections: [Users, Pages, Images, Videos],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

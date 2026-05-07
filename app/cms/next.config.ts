@@ -15,9 +15,6 @@ const nextConfig = {
   turbopack: {
     root: path.resolve(dirname, '../../'),
   },
-  experimental: {
-    turbopackServerFastRefresh: true,
-  },
 }
 
 export default withPayload(nextConfig)
