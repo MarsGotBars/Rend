@@ -8,10 +8,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 
-async function runCommand(cmd, args) {
+async function runCommand(cmd, args, options = {}) {
   return new Promise((resolve, reject) => {
     console.log(`\n▶ ${cmd} ${args.join(' ')}`)
-    const proc = spawn(cmd, args, { stdio: 'inherit', shell: true })
+    const spawnOptions = {
+      stdio: 'inherit',
+      shell: true,
+      ...options,
+      env: options.env ? { ...process.env, ...options.env } : process.env
+    }
+    const proc = spawn(cmd, args, spawnOptions)
     proc.on('close', code => {
       if (code === 0) resolve()
       else reject(new Error(`${cmd} failed with code ${code}`))
@@ -37,7 +43,10 @@ async function build() {
     const migrationsPath = path.resolve(__dirname, 'migrations')
     if (!existsSync(migrationsPath)) {
       console.log('\n▶ No migrations found, generating initial migration...')
-      await runCommand('pnpm', ['payload', 'migrate:create', '--name', 'initial'])
+      await runCommand('pnpm', ['payload', 'migrate:create', '--name', 'initial'], {
+        cwd: path.resolve(__dirname, 'app/cms'),
+        env: { ...process.env, PAYLOAD_CONFIG_PATH: './src/payload.config.ts', NODE_OPTIONS: '--no-deprecation' }
+      })
     }
 
     await runCommand('pnpm', ['run', 'build:migrate'])
