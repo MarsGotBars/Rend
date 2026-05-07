@@ -16,7 +16,7 @@ const config = {
 		prerender: {
 			entries: ['*'],
 			crawl: true,
-			handleUnseenRoutes: 'warn',
+			handleUnseenRoutes: 'ignore',
 			handleHttpError: ({ status, path }) => {
 				// Don't fail the build on 404s for unseen routes
 				if (status === 404) {

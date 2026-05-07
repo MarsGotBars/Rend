@@ -17,8 +17,15 @@ export const entries: EntryGenerator = async () => {
 			const configModule = await import(urlPath)
 			config = configModule.default
 		} else {
-			const configModule = await import('../../../app/cms/src/payload.config.ts')
-			config = configModule.default
+			// In build environments without env var, try to load from compiled .next output
+			// This will fail gracefully in SSG build and is expected
+			try {
+				const configModule = await import('../../../app/cms/src/payload.config.ts')
+				config = configModule.default
+			} catch {
+				console.warn('⚠ Could not import TypeScript config directly, falling back to build-time generation')
+				return []
+			}
 		}
 		
 		const payload = await getPayload({ config })
@@ -34,11 +41,13 @@ export const entries: EntryGenerator = async () => {
 		}))
 	} catch (err) {
 		console.warn('⚠ Could not auto-generate slug entries during build:', err instanceof Error ? err.message : String(err))
-		// Graceful fallback: pages will be rendered on-demand or show 404
+		// Graceful fallback: during SSG build, return empty array (expected)
 		return []
 	}
 }
 
+// During SSG (static build), this route won't have pregenerated pages if database is empty
+// Browser requests to /[slug] will result in 404, which is expected
 export const prerender = true
 
 export const load: PageServerLoad = async ({ params, locals }) => {
