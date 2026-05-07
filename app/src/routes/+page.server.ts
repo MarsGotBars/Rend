@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types'
 
-export const prerender = false;
+export const prerender = true;
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [users, images, pages] = await Promise.all([

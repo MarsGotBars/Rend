@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-node';
+import adapter from '@sveltejs/adapter-static';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env' });
@@ -14,6 +14,7 @@ const config = {
 			'@cms': 'app/cms/src'
 		},
 		prerender: {
+			entries: ['*'],
 			handleUnseenRoutes: 'warn'
 		},
 		files: {
