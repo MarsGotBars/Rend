@@ -40,7 +40,7 @@ async function build() {
     }
 
     // Generate initial migration if none exist
-    const migrationsPath = path.resolve(__dirname, 'migrations')
+    const migrationsPath = path.resolve(__dirname, 'app/cms/migrations')
     if (!existsSync(migrationsPath)) {
       console.log('\n▶ No migrations found, generating initial migration...')
       try {
