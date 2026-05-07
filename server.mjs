@@ -3,14 +3,35 @@ import { handler as skHandler } from './build/handler.js';
 import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
+
+function runCommand(cmd, args) {
+	return new Promise((resolve, reject) => {
+		console.log(`Running: ${cmd} ${args.join(' ')}`);
+		const proc = spawn(cmd, args, { stdio: 'inherit', shell: true });
+		proc.on('close', code => {
+			if (code === 0) resolve();
+			else reject(new Error(`${cmd} failed with code ${code}`));
+		});
+	});
+}
 
 async function start() {
 	try {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
+		
+		// Run migrations if needed
+		console.log('Running database migrations...');
+		try {
+			await runCommand('pnpm', ['payload', 'migrate']);
+			console.log('✓ Migrations completed');
+		} catch (migrateErr) {
+			console.warn('⚠ Migration warning:', migrateErr.message);
+		}
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
