@@ -4,8 +4,13 @@ import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'child_process';
+import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
 const PORT = process.env.PORT || 3000;
 
 function runCommand(cmd, args, env = {}) {
@@ -33,6 +38,7 @@ async function start() {
 		try {
 			await runCommand('pnpm', ['payload', 'migrate'], {
 				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
+				PAYLOAD_SECRET: process.env.PAYLOAD_SECRET || 'supersecretkey',
 				NODE_OPTIONS: '--no-deprecation --disable-warning=ExperimentalWarning'
 			});
 			console.log('✓ Database schema initialized');
