@@ -13,6 +13,9 @@ const config = {
 		alias: {
 			'@cms': 'app/cms/src'
 		},
+		prerender: {
+			handleUnseenRoutes: 'warn'
+		},
 		files: {
 			appTemplate: 'app/src/app.html',
 			errorTemplate: 'app/src/error.html',
