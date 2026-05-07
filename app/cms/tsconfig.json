@@ -31,10 +31,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    // SvelteKit source — correct paths relative to this tsconfig in app/cms/
-    "../../app/src/**/*.d.ts",
-    "../../app/src/**/*.ts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
