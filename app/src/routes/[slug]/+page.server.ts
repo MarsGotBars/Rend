@@ -1,12 +1,25 @@
 import { error } from '@sveltejs/kit'
 import type { PageServerLoad, EntryGenerator } from './$types'
 import type { Image } from '../../../cms/src/payload-types'
+import { pathToFileURL } from 'url'
 
 export const entries: EntryGenerator = async () => {
 	try {
-		// Dynamic import to avoid circular dependency issues
+		// Import Payload and config
 		const { getPayload } = await import('payload')
-		const config = (await import('../../../app/cms/src/payload.config.ts')).default
+		
+		// Support both absolute path (from env) and relative import
+		let config
+		if (process.env.PAYLOAD_CONFIG_PATH) {
+			const configPath = process.env.PAYLOAD_CONFIG_PATH
+			// Convert to file:// URL for Windows compatibility
+			const urlPath = configPath.startsWith('file://') ? configPath : pathToFileURL(configPath).href
+			const configModule = await import(urlPath)
+			config = configModule.default
+		} else {
+			const configModule = await import('../../../app/cms/src/payload.config.ts')
+			config = configModule.default
+		}
 		
 		const payload = await getPayload({ config })
 
@@ -15,12 +28,13 @@ export const entries: EntryGenerator = async () => {
 			limit: 1000,
 		})
 
+		console.log(`✓ Generated ${result.docs.length} slug entries from database`)
 		return result.docs.map((page: any) => ({
 			slug: page.slug,
 		}))
 	} catch (err) {
-		console.warn('Could not auto-generate slug entries during build:', err instanceof Error ? err.message : String(err))
-		// Fallback: return empty array, pages will be generated on-demand
+		console.warn('⚠ Could not auto-generate slug entries during build:', err instanceof Error ? err.message : String(err))
+		// Graceful fallback: pages will be rendered on-demand or show 404
 		return []
 	}
 }

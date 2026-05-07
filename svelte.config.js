@@ -13,10 +13,18 @@ const config = {
 		alias: {
 			'@cms': 'app/cms/src'
 		},
-		adapter: adapter(),
 		prerender: {
 			entries: ['*'],
-			crawl: true
+			crawl: true,
+			handleHttpError: ({ status, path }) => {
+				// Don't fail the build on 404s for unseen routes
+				if (status === 404) {
+					console.warn(`Skipping prerender for unseen route: ${path}`)
+					return
+				}
+				// Fail on other errors
+				throw new Error(`${status} on ${path}`)
+			}
 		},
 		files: {
 			appTemplate: 'app/src/app.html',
