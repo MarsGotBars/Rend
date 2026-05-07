@@ -31,13 +31,14 @@ async function start() {
 		// Run migrations if needed
 		console.log('Running database migrations...');
 		try {
-			await runCommand('pnpm', ['payload', 'migrate'], {
+			// Use tsx to run TypeScript migrations
+			await runCommand('pnpm', ['tsx', './node_modules/.bin/payload', 'migrate'], {
 				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
 				NODE_OPTIONS: '--no-deprecation'
 			});
 			console.log('✓ Migrations completed');
 		} catch (migrateErr) {
-			console.warn('⚠ Migration warning:', migrateErr.message);
+			console.warn('⚠ Migration warning (non-critical):', migrateErr.message);
 		}
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
