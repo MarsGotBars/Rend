@@ -5,9 +5,9 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
-import { Users } from './collections/Users'
-import { Pages } from './collections/Pages'
-import { Images } from './collections/Images'
+import { Users } from './collections/Users.ts'
+import { Pages } from './collections/Pages.ts'
+import { Images } from './collections/Images.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,6 +22,9 @@ export default buildConfig({
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      actions: ['/components/RebuildButton#RebuildButton'],
     },
   },
   collections: [Users, Pages, Images],

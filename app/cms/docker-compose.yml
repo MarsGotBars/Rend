@@ -1,43 +1,23 @@
 version: '3'
 
+# This project uses SQLite — no external database service is needed.
+# The db file (dev.db) and uploaded media are mounted as volumes.
+#
+# Usage:
+#   docker compose up          — starts the combined Rend server (Next + SvelteKit)
+#   docker compose up --build  — rebuilds the image first
+
 services:
-  payload:
-    image: node:20-alpine
+  rend:
+    build:
+      context: ../..
+      dockerfile: app/cms/Dockerfile
     ports:
       - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - mongo
-      # - postgres
     env_file:
-      - .env
-
-  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
+      - ../../.env
     volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-
-volumes:
-  data:
-  # pgdata:
-  node_modules:
+      # Persist the SQLite database across container restarts
+      - ../../dev.db:/app/dev.db
+      # Persist uploaded media
+      - ../../media:/app/media

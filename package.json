@@ -16,10 +16,14 @@
 		"preview": "cross-env NODE_ENV=production PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts NODE_OPTIONS=--no-deprecation node server.mjs",
 		"start": "cross-env NODE_OPTIONS=--no-deprecation next start",
 		"prepare": "svelte-kit sync || echo ''",
-		"generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-		"generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-		"payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-		"cms": "cross-env PAYLOAD_CONFIG_PATH=./app/cms/payload.config.ts next dev app/cms -p 3000",
+		"generate:importmap": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts payload generate:importmap --disable-transpile",
+		"generate:types": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts payload generate:types --disable-transpile",
+		"payload": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts payload --disable-transpile",
+		"cms": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts next dev app/cms -p 3000",
+		"cms-build": "pnpm run build:next",
+		"cms-lint": "pnpm --filter rend-cms lint",
+		"cms-generate:types": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts pnpm exec payload generate:types --disable-transpile",
+		"cms-generate:importmap": "cd app/cms && cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts pnpm exec payload generate:importmap --disable-transpile",
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"test": "pnpm run test:int && pnpm run test:e2e",
@@ -63,7 +67,7 @@
 		"vitest": "4.0.18"
 	},
 	"engines": {
-		"node": "^18.20.2 || >=20.9.0",
+		"node": "^20.9.0 || ^22.0.0",
 		"pnpm": "^9 || ^10"
 	},
 	"pnpm": {

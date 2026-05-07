@@ -1,0 +1,12 @@
+{
+	"name": "rend-cms",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"description": "PayloadCMS + Next.js admin panel for Rend",
+	"scripts": {
+		"dev": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=./src/payload.config.ts next dev ../../app/cms -p 3000",
+		"build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build ../../app/cms",
+		"lint": "eslint ."
+	}
+}

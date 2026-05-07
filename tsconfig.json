@@ -1,4 +1,11 @@
 {
+  // Root TypeScript project references config.
+  // Run `tsc --build` from the workspace root to type-check all sub-projects.
+  // Individual editors/tools use the sub-project tsconfigs directly.
+  "files": [],
+  "references": [
+    { "path": "./app/cms/tsconfig.json" }
+  ],
   "compilerOptions": {
     "paths": {
       "@payload-config": ["./app/cms/src/payload.config.ts"]

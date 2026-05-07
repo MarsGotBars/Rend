@@ -1,3 +1,6 @@
+packages:
+  - 'app/cms'
+
 onlyBuiltDependencies:
   - esbuild
   - sharp
