@@ -3,36 +3,14 @@ import { handler as skHandler } from './build/handler.js';
 import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getPayload } from 'payload';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
-
-async function initializeDatabase() {
-	try {
-		console.log('Initializing database...');
-		
-		// Import the compiled Payload config from Next.js build
-		const { default: config } = await import('./app/cms/.next/server/chunks/payload.config.js');
-		
-		console.log('Loading Payload...');
-		const payload = await getPayload({ config });
-		
-		console.log('✓ Database initialized');
-		return payload;
-	} catch (err) {
-		console.warn('⚠ Database initialization warning:', err.message);
-		return null;
-	}
-}
 
 async function start() {
 	try {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
-		
-		// Initialize database
-		await initializeDatabase();
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
