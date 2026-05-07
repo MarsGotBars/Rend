@@ -31,13 +31,13 @@ async function start() {
 		// Initialize database schema on startup
 		console.log('Initializing database schema...');
 		try {
-			await runCommand('pnpm', ['tsx', 'node_modules/.bin/payload', 'migrate'], {
+			await runCommand('pnpm', ['payload', 'migrate'], {
 				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
-				NODE_OPTIONS: '--no-deprecation'
+				NODE_OPTIONS: '--no-deprecation --disable-warning=ExperimentalWarning'
 			});
 			console.log('✓ Database schema initialized');
 		} catch (err) {
-			console.warn('⚠ Database initialization warning (non-critical):', err.message);
+			console.warn('⚠ Database initialization (non-critical):', err.message);
 		}
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
