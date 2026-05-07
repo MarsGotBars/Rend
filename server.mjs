@@ -3,7 +3,6 @@ import { handler as skHandler } from './build/handler.js';
 import next from 'next';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'child_process';
 import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -13,38 +12,13 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const PORT = process.env.PORT || 3000;
 
-function runCommand(cmd, args, env = {}) {
-	return new Promise((resolve, reject) => {
-		console.log(`Running: ${cmd} ${args.join(' ')}`);
-		const proc = spawn(cmd, args, { 
-			stdio: 'inherit', 
-			shell: true,
-			env: { ...process.env, ...env }
-		});
-		proc.on('close', code => {
-			if (code === 0) resolve();
-			else reject(new Error(`${cmd} failed with code ${code}`));
-		});
-	});
-}
-
 async function start() {
 	try {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
 		
-		// Initialize database schema on startup
-		console.log('Initializing database schema...');
-		try {
-			await runCommand('pnpm', ['payload', 'migrate'], {
-				PAYLOAD_CONFIG_PATH: './app/cms/src/payload.config.ts',
-				PAYLOAD_SECRET: process.env.PAYLOAD_SECRET || 'supersecretkey',
-				NODE_OPTIONS: '--no-deprecation --disable-warning=ExperimentalWarning'
-			});
-			console.log('✓ Database schema initialized');
-		} catch (err) {
-			console.warn('⚠ Database initialization (non-critical):', err.message);
-		}
+		// Database will auto-initialize on first Payload access
+		console.log('Database will auto-initialize on first access');
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
