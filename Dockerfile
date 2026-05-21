@@ -27,9 +27,11 @@ ENV PAYLOAD_SECRET=${PAYLOAD_SECRET}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--no-deprecation
+ENV PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts
 
-# Create empty database (needed for Payload init during prerender)
+# Create empty database and run migrations to create schema
 RUN touch dev.db
+RUN pnpm run build:migrate || echo "Migration failed, will retry"
 
 # Build Next.js (Payload CMS admin)
 RUN pnpm run build:next
@@ -39,6 +41,9 @@ RUN PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts pnpm run build:sveltekit
 
 # Remove build cache (not needed at runtime)
 RUN rm -rf /app/app/cms/.next/cache
+
+# Rename the migrated dev.db as the template for first-boot initialization
+RUN cp dev.db template.db
 
 # --- Production ---
 FROM base AS runner
@@ -59,11 +64,14 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/server.mjs ./server.mjs
 
+# Template database (copied to volume on first boot)
+COPY --from=builder /app/template.db ./template.db
+
 # SvelteKit build output + static assets
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/static ./static
 
-# Next.js build output (full .next minus cache)
+# Next.js build output
 COPY --from=builder /app/app/cms/.next ./app/cms/.next
 
 # Payload source (imported at runtime for config + collections)
@@ -72,7 +80,7 @@ COPY --from=builder /app/app/cms/package.json ./app/cms/package.json
 COPY --from=builder /app/app/cms/next.config.ts ./app/cms/next.config.ts
 
 # Persistent data directories
-RUN mkdir -p /app/data /app/media && chown -R rend:rend /app/data /app/media
+RUN mkdir -p /app/data /app/media && chown -R rend:rend /app/data /app/media /app/template.db
 
 USER rend
 

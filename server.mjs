@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import next from 'next';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import dotenv from 'dotenv';
 
@@ -59,14 +60,35 @@ async function start() {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
 		
-		// Initialize Payload (triggers schema push via adapter config)
+		// Ensure database exists on first boot by copying template
+		const dbUrl = process.env.DATABASE_URL || '';
+		const dbMatch = dbUrl.match(/^file:(.+)$/);
+		if (dbMatch) {
+			const dbPath = path.resolve(dbMatch[1]);
+			const templatePath = path.resolve(__dirname, 'template.db');
+			
+			if (!fs.existsSync(dbPath) || fs.statSync(dbPath).size === 0) {
+				if (fs.existsSync(templatePath)) {
+					// Ensure parent directory exists
+					fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+					fs.copyFileSync(templatePath, dbPath);
+					console.log('✓ Database initialized from template');
+				} else {
+					console.warn('⚠ No template.db found - database may need manual migration');
+				}
+			} else {
+				console.log('✓ Existing database found');
+			}
+		}
+		
+		// Initialize Payload
 		try {
 			const configPath = process.env.PAYLOAD_CONFIG_PATH || path.resolve(__dirname, 'app/cms/src/payload.config.ts');
 			const configUrl = pathToFileURL(configPath).href;
 			const { getPayload } = await import('payload');
 			const configModule = await import(configUrl);
 			await getPayload({ config: configModule.default });
-			console.log('✓ Payload initialized (schema auto-pushed)');
+			console.log('✓ Payload initialized');
 		} catch (err) {
 			console.warn('⚠ Payload init:', err.message);
 		}

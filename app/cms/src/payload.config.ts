@@ -41,8 +41,6 @@ export default buildConfig({
       url: process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'dev.db')}`,
     },
     migrationDir: path.resolve(dirname, 'migrations'),
-    // Auto-push schema on startup (creates tables if they don't exist)
-    push: true,
   }),
   sharp,
   plugins: [],
