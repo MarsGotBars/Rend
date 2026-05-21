@@ -59,18 +59,16 @@ async function start() {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
 		
-		// Initialize Payload and run migrations to ensure schema exists
+		// Initialize Payload (triggers schema push via adapter config)
 		try {
 			const configPath = process.env.PAYLOAD_CONFIG_PATH || path.resolve(__dirname, 'app/cms/src/payload.config.ts');
 			const configUrl = pathToFileURL(configPath).href;
 			const { getPayload } = await import('payload');
 			const configModule = await import(configUrl);
-			const payload = await getPayload({ config: configModule.default });
-			await payload.db.migrate();
-			console.log('✓ Database initialized');
+			await getPayload({ config: configModule.default });
+			console.log('✓ Payload initialized (schema auto-pushed)');
 		} catch (err) {
-			console.warn('⚠ Database migration:', err.message);
-			console.warn('  (This is normal on first boot if schema already exists)');
+			console.warn('⚠ Payload init:', err.message);
 		}
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
