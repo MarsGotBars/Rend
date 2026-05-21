@@ -17,7 +17,6 @@ FROM base AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/app/cms/node_modules ./app/cms/node_modules
 COPY . .
 
 # Build args for env vars needed at build time
@@ -58,7 +57,6 @@ COPY --from=builder /app/.npmrc ./.npmrc
 
 # Copy node_modules (needed for runtime: payload, next, dotenv, etc.)
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/app/cms/node_modules ./app/cms/node_modules
 
 # Copy the unified server
 COPY --from=builder /app/server.mjs ./server.mjs
