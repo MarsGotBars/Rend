@@ -3,7 +3,7 @@
 
 FROM node:22-slim AS base
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
-RUN corepack enable pnpm
+RUN corepack enable && corepack prepare pnpm@10 --activate
 
 # --- Dependencies ---
 FROM base AS deps
