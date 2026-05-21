@@ -100,6 +100,12 @@ async function start() {
 				return;
 			}
 
+			if (url === '/__health') {
+				res.writeHead(200, { 'Content-Type': 'text/plain' });
+				res.end('ok');
+				return;
+			}
+
 			if (nextPrepared && (url.startsWith('/admin') || url.startsWith('/_next') || url.startsWith('/api'))) {
 				nextHandler(req, res);
 			} else if (skHandler) {

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit'
 import type { PageServerLoad, EntryGenerator } from './$types'
-import type { Image } from '../../../cms/src/payload-types'
+import type { Image } from '@cms/payload-types'
 import { pathToFileURL } from 'url'
 
 export const entries: EntryGenerator = async () => {
@@ -46,9 +46,8 @@ export const entries: EntryGenerator = async () => {
 	}
 }
 
-// During SSG (static build), this route won't have pregenerated pages if database is empty
-// Browser requests to /[slug] will result in 404, which is expected
-export const prerender = true
+// prerender = true is inherited from (static)/+layout.server.ts
+// During SSG build, if database is empty, requests to /[slug] will 404 (expected)
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const result = await locals.payload.find({

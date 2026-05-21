@@ -66,7 +66,7 @@ export async function POST() {
 		stdio: 'pipe',
 		env: {
 			...process.env,
-			// Don't set PAYLOAD_CONFIG_PATH in container — let entries() gracefully handle missing config
+			PAYLOAD_CONFIG_PATH: path.resolve(workspaceRoot, 'app/cms/src/payload.config.ts'),
 			NODE_OPTIONS: '--no-deprecation'
 		}
 	})
@@ -90,13 +90,13 @@ export async function POST() {
 	proc.on('close', (code) => {
 		isRebuilding = false
 		if (code === 0) {
-			console.log('[rebuild] SveleteKit rebuild complete. Triggering hot reload...')
+			console.log('[rebuild] SvelteKit rebuild complete. Triggering hot reload...')
 			// Trigger hot reload on the parent server
 			triggerHotReload().catch(err => {
 				console.error('[rebuild] Failed to trigger hot reload:', err.message)
 			})
 		} else {
-			console.error(`[rebuild] SveliteKit rebuild failed (exit ${code}).`)
+			console.error(`[rebuild] SvelteKit rebuild failed (exit ${code}).`)
 		}
 	})
 

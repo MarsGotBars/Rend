@@ -1,0 +1,8 @@
+node_modules
+.git
+.svelte-kit
+app/cms/.next
+build
+*.db
+.env.local
+.env.*.local

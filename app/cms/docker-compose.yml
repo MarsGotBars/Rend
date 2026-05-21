@@ -1,23 +1,29 @@
-version: '3'
-
-# This project uses SQLite — no external database service is needed.
-# The db file (dev.db) and uploaded media are mounted as volumes.
+# Local development / testing compose file
+# For Coolify deployment, use the Dockerfile directly (repo root)
 #
 # Usage:
-#   docker compose up          — starts the combined Rend server (Next + SvelteKit)
-#   docker compose up --build  — rebuilds the image first
+#   docker compose up --build    — build and start
+#   docker compose down          — stop and remove
 
 services:
   rend:
     build:
       context: ../..
-      dockerfile: app/cms/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET:-supersecretkey}
     ports:
       - '3000:3000'
-    env_file:
-      - ../../.env
+    environment:
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-supersecretkey}
+      - DATABASE_URL=file:/app/data/rend.db
+      - NODE_ENV=production
     volumes:
-      # Persist the SQLite database across container restarts
-      - ../../dev.db:/app/dev.db
+      # Persist SQLite database across restarts
+      - rend-data:/app/data
       # Persist uploaded media
-      - ../../media:/app/media
+      - rend-media:/app/media
+
+volumes:
+  rend-data:
+  rend-media:
