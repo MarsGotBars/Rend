@@ -60,7 +60,6 @@ COPY --from=builder /app/node_modules ./node_modules
 
 # Copy the unified server
 COPY --from=builder /app/server.mjs ./server.mjs
-COPY --from=builder /app/.env ./.env
 
 # Copy SvelteKit build output
 COPY --from=builder /app/build ./build
