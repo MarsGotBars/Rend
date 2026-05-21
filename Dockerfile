@@ -28,14 +28,17 @@ ENV DATABASE_URL=${DATABASE_URL}
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--no-deprecation
 
-# Create empty database if it doesn't exist (needed for prerender)
+# Create empty database (needed for Payload init during prerender)
 RUN touch dev.db
 
 # Build Next.js (Payload CMS admin)
 RUN pnpm run build:next
 
-# Build SvelteKit (frontend) - needs PAYLOAD_CONFIG_PATH for entries() generation
+# Build SvelteKit (frontend)
 RUN PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts pnpm run build:sveltekit
+
+# Remove build cache (not needed at runtime)
+RUN rm -rf /app/app/cms/.next/cache
 
 # --- Production ---
 FROM base AS runner
@@ -44,47 +47,37 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--no-deprecation
 ENV PORT=3000
+ENV DATABASE_URL=file:/app/data/rend.db
+ENV PAYLOAD_CONFIG_PATH=./app/cms/src/payload.config.ts
 
 # Create non-root user
 RUN groupadd --system --gid 1001 rend && \
     useradd --system --uid 1001 --gid rend rend
 
-# Copy package files for runtime imports
+# Copy only what's needed at runtime
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/.npmrc ./.npmrc
-
-# Copy node_modules (needed for runtime: payload, next, dotenv, etc.)
 COPY --from=builder /app/node_modules ./node_modules
-
-# Copy the unified server
 COPY --from=builder /app/server.mjs ./server.mjs
 
-# Copy SvelteKit build output
+# SvelteKit build output + static assets
 COPY --from=builder /app/build ./build
+COPY --from=builder /app/static ./static
 
-# Copy Next.js build output + Payload source (needed for runtime config)
+# Next.js build output (full .next minus cache)
 COPY --from=builder /app/app/cms/.next ./app/cms/.next
+
+# Payload source (imported at runtime for config + collections)
 COPY --from=builder /app/app/cms/src ./app/cms/src
 COPY --from=builder /app/app/cms/package.json ./app/cms/package.json
 COPY --from=builder /app/app/cms/next.config.ts ./app/cms/next.config.ts
 
-# Copy static assets
-COPY --from=builder /app/static ./static
-
-# Create directories for persistent data with correct permissions
+# Persistent data directories
 RUN mkdir -p /app/data /app/media && chown -R rend:rend /app/data /app/media
-
-# Database and media will be mounted as volumes
-# Default database path points to persistent volume
-ENV DATABASE_URL=file:/app/data/rend.db
 
 USER rend
 
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD node -e "fetch('http://localhost:3000/__health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 

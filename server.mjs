@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import next from 'next';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -59,8 +59,19 @@ async function start() {
 		console.log('Starting server...');
 		console.log('__dirname:', __dirname);
 		
-		// Database will auto-initialize on first Payload access
-		console.log('Database will auto-initialize on first access');
+		// Initialize Payload and run migrations to ensure schema exists
+		try {
+			const configPath = process.env.PAYLOAD_CONFIG_PATH || path.resolve(__dirname, 'app/cms/src/payload.config.ts');
+			const configUrl = pathToFileURL(configPath).href;
+			const { getPayload } = await import('payload');
+			const configModule = await import(configUrl);
+			const payload = await getPayload({ config: configModule.default });
+			await payload.db.migrate();
+			console.log('✓ Database initialized');
+		} catch (err) {
+			console.warn('⚠ Database migration:', err.message);
+			console.warn('  (This is normal on first boot if schema already exists)');
+		}
 		
 		const nextAppDir = path.resolve(__dirname, 'app/cms');
 		console.log('Next.js app directory:', nextAppDir);
